@@ -7,7 +7,7 @@ remote_state {
   config = {
     bucket                 = "terragrunt-remote-state"
     key                    = "${path_relative_to_include()}/terraform.tfstate"
-    region                 = "us-west-1"
+    region                 = "eu-west-1"
     encrypt                = true
     dynamodb_table         = "terragrunt-dynamodb-lock"
     acl                    = "bucket-owner-full-control"
