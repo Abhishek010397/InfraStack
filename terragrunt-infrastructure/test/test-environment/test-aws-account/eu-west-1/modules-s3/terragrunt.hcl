@@ -10,6 +10,7 @@ EOF
 }
 
 locals {
+  s3_bucket_config = read_terragrunt_config(find_in_parent_folders("s3_buckets.hcl"))
   random_id = substr(regex("([a-z0-9]{6}).*", uuid())[0], 0, 6)
   default_tags = {
     Environment    = "Test"
@@ -29,21 +30,17 @@ terraform {
   source  = "source"
 }
 
-inputs = {
-  s3_buckets   = [
-    {
-      name                                    = "bucket1-${local.random_id}-test"
-      object_expiration_days                  = 2
-      object_prefix                           = "/"
-      iam_policy_name                         = "bucket1-${local.random_id}-test-policy"
-    },
-    {
-      name                                    = "bucket2-${local.random_id}-test"
-      object_expiration_days                  = 2
-      object_prefix                           = "/"
-      iam_policy_name                         = "bucket2-${local.random_id}-test-policy"
-    },
+inputs = merge(
+  {
+    s3_buckets   = [
+      for bucket in local.s3_bucket_config.inputs.s3_buckets:
+      {
+        name                   = "aws-account-${local.random_id}-${bucket.name}"
+        object_expiration_days = bucket.object_expiration_days
+        object_prefix          = bucket.object_prefix
+      }
   ]
   tags    = local.tags
-}
+  }
+)
 
